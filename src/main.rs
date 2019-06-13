@@ -2,23 +2,33 @@
 use std::fs;
 
 fn main() {
-    let filename = "img3.png"; //size 800 X 800
+    let filename = "img1.jpeg"; //size 800 X 800
     let contents = fs::read(filename).unwrap();
 
-    let ihdr_check: Vec<u8> = vec![73, 72, 68, 82];
-    let plte_check: Vec<u8> = vec![80, 76, 84, 69];
-    let idat_check: Vec<u8> = vec![73, 68, 65, 84];
-    let iend_check: Vec<u8> = vec![73, 69, 78, 68];
+    let magic_number = &contents[0..8];
+    let check_magic_number: Vec<u8> = vec![137, 80, 78, 71, 13, 10, 26, 10];
 
-    let ihdr_index = check_index(ihdr_check, &contents);
+    //Check the first 8 bytes aka magic numbers of the file to check if it is a .png
+    check_png(check_magic_number, magic_number);
+
+    let ihdr_check: Vec<u8> = vec![73, 72, 68, 82]; //IHDR chunk
+    let plte_check: Vec<u8> = vec![80, 76, 84, 69]; //PLTE chunk
+    let idat_check: Vec<u8> = vec![73, 68, 65, 84]; //IDAT chunk
+    let iend_check: Vec<u8> = vec![73, 69, 78, 68]; //IEND chunk
+
+    //Get starting index of IHDR chunk
+    let ihdr_index = check_index(ihdr_check, &contents); 
     println!("IHDR index : {}", ihdr_index);
 
+    //Get starting index of PLTE chunk
     let plte_index = check_index(plte_check, &contents);
     println!("PLTE index : {}", plte_index);
 
+    //Get startig index of IDAT chunk
     let idat_index = check_index(idat_check, &contents);
     println!("IDAT index : {}", idat_index);
 
+    //Get index of IEND chunk
     let iend_index = check_index(iend_check, &contents);
     println!("IEND index : {}", iend_index);
     
@@ -56,3 +66,8 @@ fn check_index(check_vector: Vec<u8>, file_contents: &[u8]) -> u32 {
     }
     index
 }
+
+fn check_png(check_vector: Vec<u8>, magic_number: &[u8]) {
+    assert_eq!(check_vector, magic_number, "\nError : Not a png file");
+}
+
