@@ -2,7 +2,7 @@
 use std::fs;
 
 fn main() {
-    let filename = "img1.jpeg"; //size 800 X 800
+    let filename = "img3.png"; //size 800 X 800
     let contents = fs::read(filename).unwrap();
 
     let magic_number = &contents[0..8];
@@ -30,7 +30,22 @@ fn main() {
 
     //Get index of IEND chunk
     let iend_index = check_index(iend_check, &contents);
-    println!("IEND index : {}", iend_index);
+    println!("IEND index : {}\n", iend_index);
+
+    print!("IHDR chunk : \n"); 
+    chunk_length(ihdr_index, &contents);
+    print_chunk(ihdr_index, plte_index, &contents);
+    print_crc(plte_index, &contents);     
+
+    print!("PLTE chunk : \n"); 
+    chunk_length(plte_index, &contents);
+    print_chunk(plte_index, idat_index, &contents);
+    print_crc(idat_index, &contents);     
+
+    print!("IDAT chunk : \n");
+    chunk_length(idat_index, &contents);
+    print_chunk(idat_index, iend_index, &contents);
+    print_crc(iend_index, &contents); 
     
     // for (i, val) in contents.iter().enumerate() {
     //     if i % 16 == 0 {
@@ -57,17 +72,50 @@ fn main() {
     // }
 }
 
-fn check_index(check_vector: Vec<u8>, file_contents: &[u8]) -> u32 {
-    let mut index: u32 = 0;
+fn check_index(check_vector: Vec<u8>, file_contents: &[u8]) -> usize {
+    let mut index: usize = 0;
     for i in 0..file_contents.len() {
         if file_contents[i] == check_vector[0] && file_contents[i+1] == check_vector[1] && file_contents[i+2] == check_vector[2] && file_contents[i+3] == check_vector[3] {
-            index = i as u32;
+            index = i as usize;
         }
     }
     index
 }
 
+//Checks if the file is a .png file
 fn check_png(check_vector: Vec<u8>, magic_number: &[u8]) {
     assert_eq!(check_vector, magic_number, "\nError : Not a png file");
 }
 
+//prints a selected chunk
+fn print_chunk(start: usize, end: usize, contents: &[u8]) -> () {
+    let mut count = 0;
+    println!("Data : ");
+    for i in start+4..end-8{ //First 4 bytes are the chunk name and last 8 are crc and length of next chunk
+        if count % 16 == 0 && count != 0 {
+            println!("");
+        }
+
+        print!("{} ", contents[i]);
+        count += 1;
+    }
+    println!("");  
+}
+
+//Function to return the length of a particular chunk
+fn chunk_length (index: usize, contents: &[u8]) -> () {
+    print!("Length : ");
+    for i in index-4..index {
+        print!("{} ", contents[i]);
+    }
+    println!("");
+}
+
+//Function to print CRC of a chunk
+fn print_crc (index: usize, contents: &[u8]) -> () {
+    print!("CRC : ");
+    for i in index-8..index-4 {
+        print!("{} ", contents[i]);
+    }
+    println!("\n");
+}
