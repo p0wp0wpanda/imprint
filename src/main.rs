@@ -2,7 +2,7 @@
 use std::fs;
 
 fn main() {
-    let filename = "img3.png"; //size 800 X 800
+    let filename = "img5.png"; //size 800 X 800
     let contents = fs::read(filename).unwrap();
 
     let magic_number = &contents[0..8];
@@ -21,8 +21,8 @@ fn main() {
     println!("IHDR index : {}", ihdr_index);
 
     //Get starting index of PLTE chunk
-    let plte_index = check_index(plte_check, &contents);
-    println!("PLTE index : {}", plte_index);
+    // let plte_index = check_index(plte_check, &contents);
+    // println!("PLTE index : {}", plte_index);
 
     //Get startig index of IDAT chunk
     let idat_index = check_index(idat_check, &contents);
@@ -34,14 +34,24 @@ fn main() {
 
     print!("IHDR chunk : \n"); 
     chunk_length(ihdr_index, &contents);
-    print_chunk(ihdr_index, plte_index, &contents);
-    print_crc(plte_index, &contents);     
+    print_chunk(ihdr_index, idat_index, &contents); //Only for img5. Comment out later
+    
+    
+    
+    
+    
+    // print_chunk(ihdr_index, plte_index, &contents); //For img3. Uncomment later
+    // print_crc(plte_index, &contents);     
 
-    print!("PLTE chunk : \n"); 
-    chunk_length(plte_index, &contents);
-    print_chunk(plte_index, idat_index, &contents);
-    print_crc(idat_index, &contents);     
+    // print!("PLTE chunk : \n"); 
+    // chunk_length(plte_index, &contents);
+    // print_chunk(plte_index, idat_index, &contents);                  
+    // print_crc(idat_index, &contents);     //For img3. Uncomment later
 
+    
+    
+    
+    
     print!("IDAT chunk : \n");
     chunk_length(idat_index, &contents);
     print_chunk(idat_index, iend_index, &contents);
